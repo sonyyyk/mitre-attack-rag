@@ -78,3 +78,16 @@ class MITREParser:
             self.parse_attack_pattern(pattern)
             for pattern in attack_patterns
         ]
+
+    def find_by_name(self, name: str) -> AttackTechnique | None:
+        """
+        Find a technique by its name.
+        """
+
+        techniques = self.parse_all_attack_patterns()
+
+        for technique in techniques:
+            if technique.name.lower() == name.lower():
+                return technique
+
+        return None
