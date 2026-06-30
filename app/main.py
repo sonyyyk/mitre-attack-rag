@@ -1,10 +1,7 @@
-from app.mitre.manager import MITREKnowledgeBase
+from app.mitre.parser import MITREParser
 
+parser = MITREParser()
 
-def main():
-    kb = MITREKnowledgeBase()
-    kb.initialize()
+attack_patterns = parser.get_attack_patterns()
 
-
-if __name__ == "__main__":
-    main()
+print(attack_patterns[0])
