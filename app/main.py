@@ -1,7 +1,19 @@
+from app.mitre.exporter import MITREExporter
 from app.mitre.parser import MITREParser
 
-parser = MITREParser()
 
-attack_patterns = parser.get_attack_patterns()
+def main():
 
-print(attack_patterns[0])
+    parser = MITREParser()
+
+    exporter = MITREExporter()
+
+    techniques = parser.parse_all_attack_patterns()
+
+    print(f"Loaded techniques: {len(techniques)}")
+
+    exporter.export(techniques)
+
+
+if __name__ == "__main__":
+    main()
