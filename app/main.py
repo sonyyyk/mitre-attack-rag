@@ -1,60 +1,55 @@
-from collections import defaultdict
-
-from app.embeddings.manager import EmbeddingManager
-from app.ml.manager import MLManager
-from app.mitre.parser import MITREParser
+from app.embeddings.encoder import EmbeddingEncoder
+from app.vector_db.manager import VectorDBManager
 
 
 def main():
-    print("Loading MITRE techniques...")
 
-    parser = MITREParser()
-    techniques = parser.parse_all_attack_patterns()
+    encoder = EmbeddingEncoder()
 
-    print(f"Loaded techniques: {len(techniques)}")
+    vector_db = VectorDBManager()
 
-    print("\nLoading embeddings...")
+    query = """
+    The attacker dumped credentials from LSASS memory.
+    """
 
-    embedding_manager = EmbeddingManager()
-    embeddings = embedding_manager.load_embeddings()
+    print()
+    print("Query:")
+    print(query)
+    print()
 
-    print(f"Loaded embeddings: {len(embeddings)}")
-
-    print("\nRunning KMeans clustering...")
-
-    ml_manager = MLManager()
-    clusters = ml_manager.cluster_embeddings(embeddings)
-
-    print("Clustering completed.\n")
-
-    grouped = defaultdict(list)
-
-    for technique, cluster in zip(techniques, clusters):
-        grouped[cluster].append(technique)
+    results = vector_db.search_text(
+        query,
+        encoder,
+        top_k=5,
+    )
 
     print("=" * 70)
-    print("MITRE ATT&CK Technique Clusters")
+    print("Top 5 similar MITRE techniques")
     print("=" * 70)
 
-    for cluster_id in sorted(grouped.keys()):
+    documents = results["documents"][0]
+    metadatas = results["metadatas"][0]
+    distances = results["distances"][0]
 
-        print(f"\nCluster {cluster_id}")
-        print("-" * 70)
+    for index in range(len(documents)):
 
-        for technique in grouped[cluster_id][:15]:
-            print(f"• {technique.mitre_id} - {technique.name}")
+        print()
+        print(f"Rank #{index + 1}")
+        print("-" * 50)
 
-        if len(grouped[cluster_id]) > 15:
-            print("...")
+        print("Technique:")
+        print(metadatas[index]["name"])
 
-        print(f"\nTotal techniques: {len(grouped[cluster_id])}")
+        print()
 
-    print("\n" + "=" * 70)
-    print("Cluster Statistics")
-    print("=" * 70)
+        print("Distance:")
+        print(distances[index])
 
-    for cluster_id in sorted(grouped.keys()):
-        print(f"Cluster {cluster_id}: {len(grouped[cluster_id])} techniques")
+        print()
+
+        print("Document:")
+        print(documents[index][:250])
+        print("...")
 
 
 if __name__ == "__main__":
