@@ -1,55 +1,49 @@
-from app.embeddings.encoder import EmbeddingEncoder
+from app.embeddings.manager import EmbeddingManager
+from app.mitre.parser import MITREParser
 from app.vector_db.manager import VectorDBManager
 
 
 def main():
 
-    encoder = EmbeddingEncoder()
+    print("=" * 70)
+    print("MITRE ATT&CK Vector Database Builder")
+    print("=" * 70)
+
+    print("\nLoading MITRE techniques...")
+
+    parser = MITREParser()
+
+    techniques = parser.parse_all_attack_patterns()
+
+    print(f"Loaded techniques: {len(techniques)}")
+
+    print("\nLoading embeddings...")
+
+    embedding_manager = EmbeddingManager()
+
+    embeddings = embedding_manager.load_embeddings()
+
+    print(f"Loaded embeddings: {len(embeddings)}")
+
+    print("\nConnecting to ChromaDB...")
 
     vector_db = VectorDBManager()
 
-    query = """
-    The attacker dumped credentials from LSASS memory.
-    """
+    # Якщо база вже існує — очистити її
+    vector_db.clear()
 
-    print()
-    print("Query:")
-    print(query)
-    print()
+    print("Creating vector database...")
 
-    results = vector_db.search_text(
-        query,
-        encoder,
-        top_k=5,
+    vector_db.add_documents(
+        techniques=techniques,
+        embeddings=embeddings,
     )
 
+    print("\nDatabase successfully created!")
+
+    print(f"Stored vectors: {vector_db.count()}")
+
     print("=" * 70)
-    print("Top 5 similar MITRE techniques")
-    print("=" * 70)
-
-    documents = results["documents"][0]
-    metadatas = results["metadatas"][0]
-    distances = results["distances"][0]
-
-    for index in range(len(documents)):
-
-        print()
-        print(f"Rank #{index + 1}")
-        print("-" * 50)
-
-        print("Technique:")
-        print(metadatas[index]["name"])
-
-        print()
-
-        print("Distance:")
-        print(distances[index])
-
-        print()
-
-        print("Document:")
-        print(documents[index][:250])
-        print("...")
 
 
 if __name__ == "__main__":

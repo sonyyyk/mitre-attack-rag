@@ -4,7 +4,7 @@ from app.vector_db.config import COLLECTION_NAME
 
 class VectorDBManager:
     """
-    Manage vector database.
+    Manage ChromaDB vector database.
     """
 
     def __init__(self):
@@ -15,16 +15,59 @@ class VectorDBManager:
             name=COLLECTION_NAME
         )
 
+    def clear(self):
+        """
+        Remove all vectors from collection.
+        """
+
+        ids = self.collection.get()["ids"]
+
+        if ids:
+            self.collection.delete(ids=ids)
+
     def add_documents(
         self,
-        ids,
-        documents,
+        techniques,
         embeddings,
-        metadatas,
     ):
         """
-        Add documents to ChromaDB.
+        Store MITRE techniques in ChromaDB.
         """
+
+        ids = []
+        documents = []
+        metadatas = []
+
+        for technique, embedding in zip(
+            techniques,
+            embeddings,
+        ):
+
+            ids.append(
+                technique.mitre_id
+            )
+
+            document = (
+                f"{technique.name}\n\n"
+                f"{technique.description}"
+            )
+
+            documents.append(
+                document
+            )
+
+            metadatas.append(
+                {
+                    "mitre_id": technique.mitre_id,
+                    "name": technique.name,
+                    "tactics": ", ".join(
+                        technique.tactics
+                    ),
+                    "platforms": ", ".join(
+                        technique.platforms
+                    ),
+                }
+            )
 
         self.collection.add(
             ids=ids,
@@ -47,17 +90,14 @@ class VectorDBManager:
             n_results=top_k,
         )
 
-    def count(self):
-
-        return self.collection.count()
     def search_text(
         self,
         text: str,
         encoder,
         top_k: int = 5,
-        ):
+    ):
         """
-        Search techniques using text query.
+        Search techniques using text.
         """
 
         embedding = encoder.encode(text)
@@ -66,3 +106,10 @@ class VectorDBManager:
             embedding,
             top_k,
         )
+
+    def count(self):
+        """
+        Return number of stored vectors.
+        """
+
+        return self.collection.count()

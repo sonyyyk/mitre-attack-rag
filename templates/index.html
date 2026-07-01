@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Cyber Threat Analyzer</title>
+
+    <link
+        rel="stylesheet"
+        href="/static/style.css"
+    >
+
+</head>
+
+<body>
+
+<header>
+
+    <div class="logo">
+
+        🛡️ Cyber Threat Analyzer
+
+    </div>
+
+    <div class="status">
+
+        <span class="online"></span>
+
+        System Ready
+
+    </div>
+
+</header>
+
+<main>
+
+<section class="hero">
+
+<h1>
+
+Automated Cyber Threat Analysis
+
+</h1>
+
+<p>
+
+Semantic MITRE ATT&CK Mapping using Machine Learning
+
+</p>
+
+</section>
+
+<section class="input-card">
+
+<form
+action="/analyze"
+method="post"
+enctype="multipart/form-data"
+>
+
+<label>
+
+Incident Description
+
+</label>
+
+<textarea
+
+name="query"
+
+placeholder="Describe the cyber incident here..."
+
+required
+
+>{{ query if query else "" }}</textarea>
+
+<div class="buttons">
+
+<button
+class="primary"
+type="submit"
+>
+
+🔍 Analyze
+
+</button>
+
+<button
+type="button"
+class="secondary"
+>
+
+📄 Upload File
+
+</button>
+
+</div>
+
+</form>
+
+</section>
+
+{% if report %}
+
+<section class="dashboard">
+
+<div class="stat">
+
+<h3>
+
+Risk
+
+</h3>
+
+<p>
+
+{{ report.risk }}
+
+</p>
+
+</div>
+
+<div class="stat">
+
+<h3>
+
+Techniques
+
+</h3>
+
+<p>
+
+{{ report.technique_count }}
+
+</p>
+
+</div>
+
+<div class="stat">
+
+<h3>
+
+Platforms
+
+</h3>
+
+<p>
+
+{{ report.platform_count }}
+
+</p>
+
+</div>
+
+<div class="stat">
+
+<h3>
+
+Tactics
+
+</h3>
+
+<p>
+
+{{ report.tactic_count }}
+
+</p>
+
+</div>
+
+</section>
+
+<section class="summary">
+
+<h2>
+
+Analysis Summary
+
+</h2>
+
+<p>
+
+{{ report.summary }}
+
+</p>
+
+</section>
+
+<section>
+
+<h2>
+
+Detected MITRE ATT&CK Techniques
+
+</h2>
+
+<div class="techniques">
+
+{% for technique in report.techniques %}
+
+<div class="technique-card">
+
+<h3>
+
+{{ technique.id }}
+
+</h3>
+
+<h4>
+
+{{ technique.name }}
+
+</h4>
+
+<p>
+
+<strong>Tactic:</strong>
+
+{{ technique.tactic }}
+
+</p>
+
+<p>
+
+<strong>Platform:</strong>
+
+{{ technique.platform }}
+
+</p>
+
+<p>
+
+<strong>Similarity:</strong>
+
+{{ technique.similarity }}%
+
+</p>
+
+</div>
+
+{% endfor %}
+
+</div>
+
+</section>
+
+<section class="recommendations">
+
+<h2>
+
+Recommendations
+
+</h2>
+
+<ul>
+
+{% for recommendation in report.recommendations %}
+
+<li>
+
+{{ recommendation }}
+
+</li>
+
+{% endfor %}
+
+</ul>
+
+</section>
+
+<section class="export">
+
+<form
+action="/export"
+method="post"
+>
+
+<input
+type="hidden"
+name="query"
+value="{{ query }}"
+>
+
+<button
+type="submit"
+>
+
+⬇ Export PDF
+
+</button>
+
+</form>
+
+</section>
+
+{% endif %}
+
+</main>
+
+<footer>
+
+Cyber Threat Analyzer
+
+•
+
+MITRE ATT&CK
+
+•
+
+SentenceTransformer
+
+•
+
+ChromaDB
+
+•
+
+FastAPI
+
+</footer>
+
+<script src="/static/script.js"></script>
+
+</body>
+
+</html>
